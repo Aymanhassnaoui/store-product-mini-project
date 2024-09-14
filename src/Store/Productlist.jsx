@@ -1,120 +1,108 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import Product from './product';
 import SerchForm from './serch';
 
 function Productlist() {
+  const [productList, setProduct] = useState([]);
+  const [searchinput, setsearchinput] = useState(''); // Chaine vide au lieu de tableau
+  const [Categories, setCategories] = useState([]);
+  const [searchCategories, setsearchCategories] = useState(''); // Chaine vide au lieu de tableau
 
+  // Fonction pour afficher les produits filtrés
+  const displayProductS = () => {
+    if (productList.length > 0) {
+      const productsTemp = productList.filter((product) => {
+        const matchesSearchInput =
+          product.title.toLowerCase().includes(searchinput.toLowerCase()) || 
+          product.id.toString().includes(searchinput);
 
-    const [productList, setProduct] = useState([]);
-    
-    const [searchinput, setsearchinput] = useState([]);
-    const [Categories, setCategories] = useState([]);
-    const [searchCategories, setsearchCategories] = useState([]);
+        const matchesCategory =
+          searchCategories === '' || product.category === searchCategories;
 
+        return matchesSearchInput && matchesCategory;
+      });
 
- 
-
-    const displayProductS = ()  => {
-
-        if (productList.length > 0) {
-            const productsTemp = productList.filter( product => {
-          
-                const matchesSearchInput = product.title.includes(searchinput) || product.id.toString().includes(searchinput)  || product.category === searchCategories;
-                const matchesCategory = searchCategories === '' || product.category === searchCategories;
-
-                return matchesSearchInput && matchesCategory;
-        
-        } )
-    
-        
-        return productsTemp.map((product, key) => {
-            return <Product product={product} key={key} />
-            })
-        }
-        return  <tr>
-
-            <td> no  product</td>
-        </tr>
-        }
-
-
-
-       
-    
-        
-
-
-
-    const getProductS = ()  => {
-        fetch('https://fakestoreapi.com/products/')
-        .then(response => response.json())
-        .then(response => setProduct(  response));
-      
+      if (productsTemp.length > 0) {
+        return productsTemp.map((product, key) => (
+          <Product product={product} key={key} />
+        ));
+      } else {
+        return (
+          <tr>
+            <td colSpan="7">Aucun produit trouvé</td>
+          </tr>
+        );
+      }
     }
+    return (
+      <tr>
+        <td colSpan="7">Aucun produit</td>
+      </tr>
+    );
+  };
 
+  // Fonction pour récupérer les produits
+  const getProductS = () => {
+    fetch('https://fakestoreapi.com/products/')
+      .then((response) => response.json())
+      .then((response) => setProduct(response));
+  };
 
-    const getCategories = ()  => {
-        fetch('https://fakestoreapi.com/products/categories')
-        .then(response => response.json())
-        .then(response => setCategories(  response));
-     
-    }
+  // Fonction pour récupérer les catégories
+  const getCategories = () => {
+    fetch('https://fakestoreapi.com/products/categories')
+      .then((response) => response.json())
+      .then((response) => setCategories(response));
+  };
 
- 
-    useEffect(() => {
-     getCategories();
-      getProductS ()
-          }, []);
+  useEffect(() => {
+    getCategories();
+    getProductS();
+  }, []);
 
+  // Gérer la recherche par texte
+  const handleSearch = (value) => {
+    setsearchinput(value);
+  };
 
-          const handleSearch = (value) => {
-            setsearchinput(value);
-          };
+  // Gérer le clic sur une catégorie
+  const handleClick = (e) => {
+    const clickedCategory = e.target.innerText;
+    setsearchCategories(clickedCategory);
+    console.log("Catégorie sélectionnée:", clickedCategory);
+  };
 
-          const handleClick = (e) => {
-            const clickedCategory = e.target.innerText;  
-            setsearchCategories(clickedCategory); 
-            console.log(clickedCategory);  
-          };
+  return (
+    <div className="container">
+      <SerchForm onSearch={handleSearch} />
+      {/* Affichage des catégories */}
+      <div className="container text-center mt-5 mb-2 bg-secondary rounded">
+        <div className="row">
+          {Categories.map((Categorie, index) => (
+            <button onClick={handleClick} key={index} className="col">
+              {Categorie}
+            </button>
+          ))}
+        </div>
+      </div>
 
-  return ( 
-    
-    <div className='container'>
-      
-        <SerchForm  onSearch={handleSearch}  />
-        <div className="container text-center  mt-5  mb-2 bg-secondary rounded">
-  <div className="row">
-  {Categories.map(Categorie => (
-               <button  onClick={handleClick} className="col">
-                  {Categorie} 
-               </button>
-              
-            ))}
-  </div>
-</div>
-
-    <h1>liste des produit </h1>
-    <table className="table">
+      <h1>Liste des produits</h1>
+      <table className="table">
         <thead>
-            <tr>
-                <th>id</th>
-                <th>title</th>
-                <th>price</th>
-                <th>description</th>
-                <th>category</th>
-                <th>image</th>
-                <th>rating</th>
-            </tr>
+          <tr>
+            <th>id</th>
+            <th>title</th>
+            <th>price</th>
+            <th>description</th>
+            <th>category</th>
+            <th>image</th>
+            <th>rating</th>
+          </tr>
         </thead>
-        <tbody>
-           {displayProductS()}
-        
-        </tbody>
-    </table>
-    
-</div>
+        <tbody>{displayProductS()}</tbody>
+      </table>
+    </div>
   );
-
 }
 
-export default Productlist
+export default Productlist;
