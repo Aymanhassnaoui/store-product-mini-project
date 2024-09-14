@@ -9,6 +9,7 @@ function Productlist() {
     
     const [searchinput, setsearchinput] = useState([]);
     const [Categories, setCategories] = useState([]);
+    const [searchCategories, setsearchCategories] = useState([]);
 
 
  
@@ -18,7 +19,12 @@ function Productlist() {
         if (productList.length > 0) {
             const productsTemp = productList.filter( product => {
           
-            return product.title.includes(searchinput) || product.id.toString().includes(searchinput)   } )
+                const matchesSearchInput = product.title.includes(searchinput) || product.id.toString().includes(searchinput)  || product.category === searchCategories;
+                const matchesCategory = searchCategories === '' || product.category === searchCategories;
+
+                return matchesSearchInput && matchesCategory;
+        
+        } )
     
         
         return productsTemp.map((product, key) => {
@@ -31,6 +37,10 @@ function Productlist() {
         </tr>
         }
 
+
+
+       
+    
         
 
 
@@ -61,6 +71,12 @@ function Productlist() {
             setsearchinput(value);
           };
 
+          const handleClick = (e) => {
+            const clickedCategory = e.target.innerText;  
+            setsearchCategories(clickedCategory); 
+            console.log(clickedCategory);  
+          };
+
   return ( 
     
     <div className='container'>
@@ -69,7 +85,8 @@ function Productlist() {
         <div className="container text-center  mt-5  mb-2 bg-secondary rounded">
   <div className="row">
   {Categories.map(Categorie => (
-               <button className="col">  {Categorie} 
+               <button  onClick={handleClick} className="col">
+                  {Categorie} 
                </button>
               
             ))}
